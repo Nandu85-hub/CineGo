@@ -210,90 +210,124 @@ const UserDashboardPage = () => {
             return (
               <div
                 key={_id}
-                className="glass-panel animate-fadeInUp"
-                style={{ padding: '1.5rem', animationDelay: `${idx * 0.05}s`, opacity: 0, borderLeft: `3px solid ${sc.color}` }}
+                className="glass-panel"
+                style={{
+                  padding: '1.5rem',
+                  borderLeft: `4px solid ${sc.color}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '1.2rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                }}
               >
-                <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'flex-start' }}>
+                {/* Header: Counter, Booking Code & Status */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.8rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                    <span style={{ background: 'rgba(99, 102, 241, 0.2)', border: '1px solid var(--accent-primary)', color: '#fff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '800' }}>
+                      Ticket #{idx + 1}
+                    </span>
+                    <span style={{ fontSize: '1rem', fontWeight: '800', fontFamily: 'monospace', letterSpacing: '1px', color: 'var(--accent-primary)' }}>
+                      {bookingCode}
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Booked on: {new Date(createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                  </div>
+
+                  <span
+                    style={{
+                      fontSize: '0.78rem',
+                      fontWeight: '800',
+                      color: sc.color,
+                      background: sc.bg,
+                      border: `1px solid ${sc.border}`,
+                      padding: '0.3rem 0.8rem',
+                      borderRadius: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    {sc.icon} {sc.label}
+                  </span>
+                </div>
+
+                {/* Main Content Area */}
+                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
                   {/* Poster */}
                   <img
                     src={getMoviePosterUrl(movie)}
                     alt={movie?.title || 'Movie'}
                     referrerPolicy="no-referrer"
-                    style={{ width: '60px', height: '84px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: '1px solid var(--border-glass)' }}
+                    style={{ width: '80px', height: '110px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0, border: '1px solid var(--border-glass)' }}
                     onError={e => { e.target.onerror = null; e.target.src = getPosterFallback(movie?.title); }}
                   />
 
-                  {/* Main info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* Code + Status row */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '700', fontFamily: 'monospace', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.04)', padding: '0.15rem 0.5rem', borderRadius: '4px', border: '1px solid var(--border-glass)' }}>
-                        {bookingCode}
-                      </span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '800', color: sc.color, background: sc.bg, border: `1px solid ${sc.border}`, padding: '0.15rem 0.5rem', borderRadius: '5px', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        {sc.icon} {sc.label}
-                      </span>
-                    </div>
-
-                    {/* Movie title */}
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '800', marginBottom: '0.4rem', color: '#fff' }}>
-                      {movie?.title || 'Movie'}
+                  {/* Details */}
+                  <div style={{ flex: 1, minWidth: '240px', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <h3 style={{ fontSize: '1.3rem', fontWeight: '800', color: '#fff' }}>
+                      {movie?.title || 'Movie Title'}
                     </h3>
 
-                    {/* Theatre & Date */}
-                    <div style={{ display: 'flex', gap: '1.2rem', fontSize: '0.82rem', color: 'var(--text-muted)', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <MapPin size={12} color="var(--accent-secondary)" />
-                        {showtime?.theaterName || '—'}
-                        {showtime?.screenName && <span style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>&nbsp;• {showtime.screenName}</span>}
+                    <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.85rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <MapPin size={15} color="var(--accent-secondary)" />
+                        <strong style={{ color: '#fff' }}>{showtime?.theaterName || 'Theater'}</strong>
+                        {showtime?.screenName && <span>({showtime.screenName})</span>}
                       </span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                        <Calendar size={12} color="var(--accent-primary)" />
-                        {showtime?.dateTime ? new Date(showtime.dateTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <Calendar size={15} color="var(--accent-primary)" />
+                        {showtime?.dateTime ? new Date(showtime.dateTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Date & Time'}
                       </span>
                     </div>
 
-                    {/* Seats */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                    {/* Seats Selected */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: '600' }}>Your Seats:</span>
                       {seats?.map(seat => (
-                        <span key={seat} style={{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--accent-gold)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', padding: '0.1rem 0.45rem', borderRadius: '4px' }}>
+                        <span
+                          key={seat}
+                          style={{
+                            fontSize: '0.8rem',
+                            fontWeight: '800',
+                            color: '#fbbf24',
+                            background: 'rgba(245,158,11,0.15)',
+                            border: '1px solid rgba(245,158,11,0.3)',
+                            padding: '0.15rem 0.6rem',
+                            borderRadius: '4px',
+                          }}
+                        >
                           {seat}
                         </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Amount */}
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '0.2rem' }}>
-                      {seats?.length} seat{seats?.length !== 1 ? 's' : ''}
+                  {/* Pricing info */}
+                  <div style={{ textAlign: 'right', minWidth: '120px' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                      Total Amount Paid
                     </div>
-                    <div style={{ fontWeight: '900', color: '#34d399', fontSize: '1.3rem' }}>
+                    <div style={{ fontWeight: '900', color: '#34d399', fontSize: '1.5rem' }}>
                       ₹{totalAmount?.toLocaleString()}
                     </div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.2rem' }}>
-                      {new Date(createdAt).toLocaleDateString('en-IN')}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                      {seats?.length} {seats?.length === 1 ? 'Seat' : 'Seats'}
                     </div>
                   </div>
                 </div>
 
-                {/* Footer row */}
-                <div style={{ marginTop: '1rem', paddingTop: '0.8rem', borderTop: '1px solid var(--border-glass)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.77rem', color: 'var(--text-dim)', flexWrap: 'wrap' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <CreditCard size={12} color="#818cf8" />
-                      Payment:&nbsp;<strong style={{ color: 'var(--text-muted)' }}>
-                        {payment?.gateway?.toUpperCase() || 'RAZORPAY'}
-                      </strong>
+                {/* Footer bar */}
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
+                  <div style={{ display: 'flex', gap: '1.2rem', fontSize: '0.8rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <CreditCard size={14} color="#818cf8" />
+                      Razorpay Payment: <strong style={{ color: '#34d399' }}>Successful</strong>
                     </span>
-                    <span>
-                      Pay Status:&nbsp;<strong style={{ color: isConfirmed ? '#34d399' : '#fbbf24' }}>
-                        {payment?.status?.toUpperCase() || (isConfirmed ? 'SUCCEEDED' : 'PENDING')}
-                      </strong>
-                    </span>
-                    {payment?.gatewayOrderId && (
-                      <span style={{ fontFamily: 'monospace', color: '#818cf8' }}>
-                        {payment.gatewayOrderId}
+                    {payment?.gatewayPaymentId && (
+                      <span style={{ fontFamily: 'monospace', color: '#a5b4fc' }}>
+                        ID: {payment.gatewayPaymentId}
                       </span>
                     )}
                   </div>
@@ -301,10 +335,10 @@ const UserDashboardPage = () => {
                   {isConfirmed && (
                     <Link
                       to={`/confirmation/${_id}`}
-                      className="btn-secondary"
-                      style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem', fontWeight: '700' }}
+                      className="btn-primary"
+                      style={{ padding: '0.45rem 1.1rem', fontSize: '0.85rem', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
                     >
-                      <Ticket size={13} /> View E-Ticket
+                      <Ticket size={15} /> View Full E-Ticket
                     </Link>
                   )}
                 </div>
