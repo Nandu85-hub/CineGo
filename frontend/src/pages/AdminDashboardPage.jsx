@@ -427,36 +427,142 @@ const AdminDashboardPage = () => {
       )}
 
       {activeTab === 'bookings' && (
-        <div className="glass-panel overflow-scroll-container" style={{ padding: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.2rem', fontWeight: '700', marginBottom: '1.2rem' }}>All System Bookings & Payment Records ({bookings.length})</h3>
-          <table style={{ width: '100%', minWidth: '650px', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.9rem' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-glass)', color: 'var(--text-muted)' }}>
-                <th style={{ padding: '0.8rem' }}>Code</th>
-                <th style={{ padding: '0.8rem' }}>User</th>
-                <th style={{ padding: '0.8rem' }}>Movie</th>
-                <th style={{ padding: '0.8rem' }}>Seats</th>
-                <th style={{ padding: '0.8rem' }}>Amount</th>
-                <th style={{ padding: '0.8rem' }}>Booking Status</th>
-                <th style={{ padding: '0.8rem' }}>Payment Txn ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((b) => (
-                <tr key={b._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                  <td style={{ padding: '0.8rem', fontFamily: 'monospace', fontWeight: '700' }}>{b.bookingCode}</td>
-                  <td style={{ padding: '0.8rem' }}>{b.userId?.name} ({b.userId?.email})</td>
-                  <td style={{ padding: '0.8rem' }}>{b.movieId?.title}</td>
-                  <td style={{ padding: '0.8rem', color: 'var(--accent-gold)' }}>{b.seats.join(', ')}</td>
-                  <td style={{ padding: '0.8rem', color: 'var(--accent-green)', fontWeight: '700' }}>₹{b.totalAmount}</td>
-                  <td style={{ padding: '0.8rem', fontWeight: '700' }}>{b.status}</td>
-                  <td style={{ padding: '0.8rem', fontFamily: 'monospace', fontSize: '0.8rem', color: '#818cf8' }}>
-                    {b.paymentId?.gatewayPaymentId || b.paymentId?._id || (b.status === 'confirmed' ? `pay_test_${b._id.slice(-6)}` : 'N/A')}
-                  </td>
-                </tr>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.4rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                <Ticket color="var(--accent-primary)" /> All Users Booking History ({bookings.length})
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                Comprehensive one-by-one record of all cinema reservations, customer details, and payment transactions.
+              </p>
+            </div>
+          </div>
+
+          {bookings.length === 0 ? (
+            <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+              <Ticket size={48} style={{ margin: '0 auto 1rem', opacity: 0.4 }} />
+              <h4>No bookings found in the system yet.</h4>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+              {bookings.map((b, idx) => (
+                <div
+                  key={b._id}
+                  className="glass-panel"
+                  style={{
+                    padding: '1.5rem',
+                    borderLeft: b.status === 'confirmed' ? '4px solid #10b981' : '4px solid #f59e0b',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  {/* Top row: Counter, Booking Code & Status */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.8rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.8rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                      <span style={{ background: 'rgba(255,255,255,0.08)', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: '700' }}>
+                        #{idx + 1}
+                      </span>
+                      <span style={{ fontSize: '1.1rem', fontWeight: '800', fontFamily: 'monospace', letterSpacing: '1px', color: 'var(--accent-primary)' }}>
+                        {b.bookingCode}
+                      </span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        {new Date(b.createdAt || Date.now()).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                      <span
+                        style={{
+                          padding: '0.3rem 0.8rem',
+                          borderRadius: '20px',
+                          fontSize: '0.8rem',
+                          fontWeight: '700',
+                          textTransform: 'uppercase',
+                          background: b.status === 'confirmed' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+                          color: b.status === 'confirmed' ? '#34d399' : '#fbbf24',
+                          border: `1px solid ${b.status === 'confirmed' ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                        }}
+                      >
+                        {b.status === 'confirmed' ? '✓ Confirmed' : b.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Middle row: 3-column Grid for User, Movie, Payment info */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.2rem' }}>
+                    {/* Customer Info */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: '700' }}>
+                        Customer Info
+                      </div>
+                      <div style={{ fontWeight: '700', fontSize: '1rem', color: '#fff' }}>
+                        {b.userId?.name || 'Guest User'}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', wordBreak: 'break-all' }}>
+                        {b.userId?.email || 'N/A'}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                        User Role: <span style={{ textTransform: 'capitalize', color: '#cbd5e1' }}>{b.userId?.role || 'user'}</span>
+                      </div>
+                    </div>
+
+                    {/* Movie & Showtime Info */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: '700' }}>
+                        Movie & Screening
+                      </div>
+                      <div style={{ fontWeight: '700', fontSize: '1rem', color: '#fff' }}>
+                        {b.movieId?.title || 'Movie'}
+                      </div>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        {b.showtimeId?.theaterName || 'Theater'} • {b.showtimeId?.screenName || 'Screen 1'}
+                      </div>
+                      {b.showtimeId?.dateTime && (
+                        <div style={{ fontSize: '0.75rem', color: '#a5b4fc', marginTop: '0.2rem' }}>
+                          📅 {new Date(b.showtimeId.dateTime).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Seats & Payment */}
+                    <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', marginBottom: '0.4rem', fontWeight: '700' }}>
+                        Seats & Total Paid
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Seats:</span>
+                        {b.seats?.map((seat) => (
+                          <span
+                            key={seat}
+                            style={{
+                              background: 'rgba(236,72,153,0.15)',
+                              border: '1px solid rgba(236,72,153,0.3)',
+                              color: '#f472b6',
+                              padding: '0.1rem 0.5rem',
+                              borderRadius: '4px',
+                              fontSize: '0.8rem',
+                              fontWeight: '700',
+                            }}
+                          >
+                            {seat}
+                          </span>
+                        ))}
+                      </div>
+                      <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#34d399' }}>
+                        ₹{b.totalAmount}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '0.2rem' }}>
+                        Txn ID: {b.paymentId?.gatewayPaymentId || b.paymentId?._id || (b.status === 'confirmed' ? `pay_rzp_${b._id.slice(-8)}` : 'Pending')}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
       )}
     </div>

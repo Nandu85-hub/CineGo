@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, CircleAlert, CheckCircle2, Info, ArrowLeft, Mail, KeyRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { resendVerificationEmail, forgotPassword } from '../services/api';
+import { resendVerificationEmail, forgotPassword, directResetPassword } from '../services/api';
 
 const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
   const [modalMode, setModalMode] = useState(initialView === 'login' ? 'login' : 'register'); // 'login' | 'register' | 'forgot'
@@ -14,6 +14,8 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('user');
   const [fieldErrors, setFieldErrors] = useState({});
   const [toast, setToast] = useState(null);
@@ -80,6 +82,15 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
       } else if (password.length < 6) {
         errors.password = 'Password must be at least 6 characters.';
       }
+    } else {
+      if (!newPassword) {
+        errors.newPassword = 'New password is required.';
+      } else if (newPassword.length < 6) {
+        errors.newPassword = 'Password must be at least 6 characters.';
+      }
+      if (confirmPassword !== newPassword) {
+        errors.confirmPassword = 'Passwords do not match.';
+      }
     }
 
     setFieldErrors(errors);
@@ -118,13 +129,18 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
           navigate('/verify-otp', { state: { email: verificationEmail } });
         }, 1400);
       } else if (modalMode === 'forgot') {
-        await forgotPassword({ email: normalizedEmail });
+        await directResetPassword({ email: normalizedEmail, newPassword });
         setToast({
           type: 'success',
-          message: 'If an account exists with that email, a password reset link has been sent to your inbox.',
-          duration: 6000,
+          message: 'Password reset successful! You can now sign in with your new password.',
+          duration: 4000,
         });
         setPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        setTimeout(() => {
+          setModalMode('login');
+        }, 1500);
       }
     } catch (err) {
       const message = err?.message?.toLowerCase() || '';
@@ -255,7 +271,7 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
 
         {modalMode === 'forgot' && (
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.2rem', lineHeight: 1.5 }}>
-            Enter your registered email address below and we'll send you a secure link to reset your password.
+            Enter your registered email and your new password below to reset your CineGo password instantly.
           </p>
         )}
 
@@ -301,7 +317,7 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
             {fieldErrors.email && <p id="auth-email-error" className="auth-field-error">{fieldErrors.email}</p>}
           </div>
 
-          {modalMode !== 'forgot' && (
+          {modalMode !== 'forgot' ? (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
                 <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'block' }}>Password</label>
@@ -343,6 +359,46 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
               />
               {fieldErrors.password && <p id="auth-password-error" className="auth-field-error">{fieldErrors.password}</p>}
             </div>
+          ) : (
+            <>
+              <div>
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>New Password</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  aria-invalid={Boolean(fieldErrors.newPassword)}
+                  aria-describedby={fieldErrors.newPassword ? 'auth-newpassword-error' : undefined}
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    clearFieldError('newPassword');
+                  }}
+                  placeholder="Enter new password (min 6 chars)"
+                  className="input-field"
+                />
+                {fieldErrors.newPassword && <p id="auth-newpassword-error" className="auth-field-error">{fieldErrors.newPassword}</p>}
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.3rem', display: 'block' }}>Confirm New Password</label>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                  aria-describedby={fieldErrors.confirmPassword ? 'auth-confirmpassword-error' : undefined}
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    clearFieldError('confirmPassword');
+                  }}
+                  placeholder="Re-enter new password"
+                  className="input-field"
+                />
+                {fieldErrors.confirmPassword && <p id="auth-confirmpassword-error" className="auth-field-error">{fieldErrors.confirmPassword}</p>}
+              </div>
+            </>
           )}
 
           {modalMode === 'register' && (
@@ -360,7 +416,7 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
           )}
 
           <button type="submit" disabled={loading || isCompleting} className="btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: '0.5rem' }}>
-            {loading ? 'Processing...' : isCompleting ? 'Success!' : modalMode === 'login' ? 'Sign In' : modalMode === 'register' ? 'Create Account' : 'Send Reset Link'}
+            {loading ? 'Processing...' : isCompleting ? 'Success!' : modalMode === 'login' ? 'Sign In' : modalMode === 'register' ? 'Create Account' : 'Set New Password'}
           </button>
         </form>
 

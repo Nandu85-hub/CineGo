@@ -10,6 +10,7 @@ const {
   resendOTP,
   forgotPassword,
   resetPassword,
+  directResetPassword,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const validate = require('../middleware/validate');
@@ -39,5 +40,6 @@ router.post('/resend-otp', validate(resendOTPSchema), resendOTP);
 // Password reset
 router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+router.post('/direct-reset-password', directResetPassword);
 
 module.exports = router;

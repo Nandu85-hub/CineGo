@@ -319,6 +319,39 @@ const resetPassword = asyncWrapper(async (req, res) => {
   });
 });
 
+// ─── Direct Reset Password (In-Project Reset) ─────────────────────────────────
+const directResetPassword = asyncWrapper(async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ success: false, error: 'Email and new password are required.' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      error: 'No registered user found with this email address.',
+    });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  user.passwordHash = await bcrypt.hash(newPassword, salt);
+  user.resetPasswordToken = null;
+  user.resetPasswordExpiry = null;
+  await user.save();
+
+  res.json({
+    success: true,
+    message: 'Password updated successfully! You can now sign in with your new password.',
+  });
+});
+
 module.exports = {
   register,
   login,
@@ -329,5 +362,6 @@ module.exports = {
   resendOTP: resendVerificationEmail,
   forgotPassword,
   resetPassword,
+  directResetPassword,
 };
 

@@ -39,6 +39,7 @@ export const verifyOTP = (data) => API.post('/auth/verify-otp', data);
 export const resendOTP = (data) => API.post('/auth/resend-otp', data);
 export const forgotPassword = (data) => API.post('/auth/forgot-password', data);
 export const resetPassword = (data) => API.post('/auth/reset-password', data);
+export const directResetPassword = (data) => API.post('/auth/direct-reset-password', data);
 
 
 
