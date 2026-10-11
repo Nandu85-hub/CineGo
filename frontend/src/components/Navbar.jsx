@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Film, User, LogOut, Ticket, ShieldAlert, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
@@ -8,10 +8,31 @@ const Navbar = () => {
   const { user, logout, isAdmin } = useAuth();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const authMode = location.pathname === '/register' ? 'register' : 'login';
+
+  useEffect(() => {
+    if (location.pathname === '/login' || location.pathname === '/register') {
+      setIsAuthOpen(true);
+      return;
+    }
+
+    setIsAuthOpen(false);
+  }, [location.pathname]);
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const openAuth = (mode = 'login') => {
+    navigate(mode === 'register' ? '/register' : '/login');
+  };
+
+  const closeAuth = () => {
+    setIsAuthOpen(false);
+    navigate('/');
   };
 
   return (
@@ -137,7 +158,7 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <button onClick={() => setIsAuthOpen(true)} className="btn-primary">
+              <button onClick={() => openAuth('login')} className="btn-primary">
                 Sign In / Register
               </button>
             )}
@@ -259,7 +280,7 @@ const Navbar = () => {
               ) : (
                 <button
                   onClick={() => {
-                    setIsAuthOpen(true);
+                    openAuth('login');
                     handleLinkClick();
                   }}
                   className="btn-primary"
@@ -273,7 +294,7 @@ const Navbar = () => {
         )}
       </nav>
 
-      {isAuthOpen && <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />}
+      {isAuthOpen && <AuthModal isOpen={isAuthOpen} onClose={closeAuth} initialView={authMode} />}
     </>
   );
 };

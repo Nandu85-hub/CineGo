@@ -40,12 +40,9 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     const res = await registerUser(userData);
-    const { token: jwtToken, ...userInfo } = res.data;
-    setToken(jwtToken);
-    setUser(userInfo);
-    localStorage.setItem('token', jwtToken);
-    localStorage.setItem('user', JSON.stringify(userInfo));
-    return userInfo;
+    // No token returned after registration — user must verify email first.
+    // Return { email, message } so the caller can redirect to /verify-otp.
+    return res.data;
   };
 
   const logout = () => {

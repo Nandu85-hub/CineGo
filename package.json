@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "description": "A full-stack online movie ticket booking platform built with **Node.js**, **Express.js**, **MongoDB Atlas (Mongoose)**, **JWT Authentication**, **Real-Time Seat Reservation Logic**, **Razorpay Payment Gateway (Test Mode)**, and a modern **Vite + React** frontend.",
   "main": "index.js",
- "scripts": {
-  "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
-},
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
     "concurrently": "^10.0.4"
+  },
+  "dependencies": {
+    "razorpay": "^2.9.8"
   }
 }

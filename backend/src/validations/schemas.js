@@ -12,6 +12,60 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
+const verifyOTPSchema = Joi.object({
+  email: Joi.string().email().required(),
+  otp: Joi.string().length(6).pattern(/^\d{6}$/).required().messages({
+    'string.length': 'OTP must be exactly 6 digits',
+    'string.pattern.base': 'OTP must contain only digits',
+  }),
+});
+
+const resendOTPSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const verifyEmailSchema = Joi.object({
+  token: Joi.string().required(),
+  email: Joi.string().email().optional(),
+});
+
+const resendVerificationSchema = Joi.object({
+  email: Joi.string().email().required(),
+});
+
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().trim().email().required().messages({
+    'string.email': 'Please enter a valid email address.',
+    'any.required': 'Email address is required.',
+  }),
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required().messages({
+    'any.required': 'Reset token is required.',
+  }),
+  email: Joi.string().email().optional(),
+  password: Joi.string()
+    .min(8)
+    .max(64)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters long.',
+      'string.max': 'Password cannot exceed 64 characters.',
+      'string.pattern.base': 'Password must contain at least one uppercase letter, one lowercase letter, and one number.',
+      'any.required': 'New password is required.',
+    }),
+  confirmPassword: Joi.string().valid(Joi.ref('password')).required().messages({
+    'any.only': 'Passwords do not match.',
+    'any.required': 'Please confirm your new password.',
+  }),
+});
+
+
+
+
+
 const movieSchema = Joi.object({
   title: Joi.string().trim().required(),
   description: Joi.string().trim().required(),
@@ -70,6 +124,12 @@ const verifyPaymentSchema = Joi.object({
 module.exports = {
   registerSchema,
   loginSchema,
+  verifyOTPSchema,
+  resendOTPSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   movieSchema,
   showtimeSchema,
   reserveSeatsSchema,

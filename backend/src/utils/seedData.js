@@ -379,7 +379,7 @@ const seedData = async () => {
 
     const admin = await User.create({
       name: 'System Admin',
-      email: 'admin@moviebook.com',
+      email: 'admincine12@gmail.com',
       passwordHash: adminPasswordHash,
       role: 'admin',
     });

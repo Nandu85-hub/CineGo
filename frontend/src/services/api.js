@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,6 +33,15 @@ API.interceptors.response.use(
 export const registerUser = (userData) => API.post('/auth/register', userData);
 export const loginUser = (credentials) => API.post('/auth/login', credentials);
 export const getMe = () => API.get('/auth/me');
+export const verifyEmail = (data) => API.post('/auth/verify-email', data);
+export const resendVerificationEmail = (data) => API.post('/auth/resend-verification', data);
+export const verifyOTP = (data) => API.post('/auth/verify-otp', data);
+export const resendOTP = (data) => API.post('/auth/resend-otp', data);
+export const forgotPassword = (data) => API.post('/auth/forgot-password', data);
+export const resetPassword = (data) => API.post('/auth/reset-password', data);
+
+
+
 
 
 export const fetchMovies = (params) => API.get('/movies', { params });

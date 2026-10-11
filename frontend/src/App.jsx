@@ -10,6 +10,9 @@ import CheckoutPage from './pages/CheckoutPage';
 import BookingConfirmationPage from './pages/BookingConfirmationPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import VerifyOTPPage from './pages/VerifyOTPPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -23,6 +26,11 @@ function App() {
           <main className="app-container main-content" style={{ flexGrow: 1 }}>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<HomePage />} />
+              <Route path="/register" element={<HomePage />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/verify-otp" element={<VerifyOTPPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/movie/:id" element={<MovieDetailPage />} />
               <Route path="/seats/:showtimeId" element={<SeatSelectionPage />} />
 
