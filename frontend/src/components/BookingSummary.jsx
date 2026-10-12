@@ -1,5 +1,5 @@
 import React from 'react';
-import { Ticket, ShoppingBag, Clock } from 'lucide-react';
+import { Ticket, ShoppingBag, Clock, Lock } from 'lucide-react';
 import { getMoviePosterUrl, getPosterFallback } from '../utils/moviePosters';
 
 const BookingSummary = ({
@@ -101,10 +101,10 @@ const BookingSummary = ({
         }}
       >
         {loading ? (
-          'Processing...'
+          'Opening Razorpay Checkout...'
         ) : (
           <>
-            <ShoppingBag size={18} /> Proceed to Checkout
+            <Lock size={18} /> Pay ₹{totalAmount} with Razorpay
           </>
         )}
       </button>

@@ -57,56 +57,94 @@ const CheckoutPage = () => {
   const handlePayment = async () => {
     setLoading(true);
     setError('');
-    setPaymentStep('processing');
-    setProcessingStage(1);
 
     try {
+      // 1. Create order on backend via Razorpay Orders API
       const orderRes = await createPaymentOrder({ bookingId: booking._id });
-      const orderId = orderRes.data.orderId;
+      const orderData = orderRes.data;
 
-      // Realistic Razorpay stage transitions:
-      // Stage 1: Initiating Secure Connection
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      setProcessingStage(2);
-
-      // Stage 2: Authorizing with Bank / Payment Network
-      await new Promise((resolve) => setTimeout(resolve, 1100));
-      setProcessingStage(3);
-
-      // Stage 3: Verifying Signature and Completing
-      await new Promise((resolve) => setTimeout(resolve, 900));
-
-      const mockPaymentId = `pay_${Math.random().toString(36).substring(2, 9).toUpperCase()}${Date.now().toString().slice(-4)}`;
-      const mockSignature = `sig_test_${Date.now()}`;
-      setPaymentTxnId(mockPaymentId);
-
-      const verifyRes = await verifyPaymentSignature({
-        bookingId: booking._id,
-        razorpay_order_id: orderId,
-        razorpay_payment_id: mockPaymentId,
-        razorpay_signature: mockSignature,
-      });
-
-      if (verifyRes.success) {
-        setPaymentStep('success');
-        setTimeout(() => {
-          navigate(`/confirmation/${booking._id}`);
-        }, 2600);
-      } else {
-        setError('Payment verification failed.');
-        setPaymentStep('select');
+      if (!orderData || !orderData.orderId) {
+        throw new Error('Failed to initiate Razorpay order. Please try again.');
       }
+
+      // Check if Razorpay SDK script is loaded
+      if (!window.Razorpay) {
+        throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
+      }
+
+      // 2. Configure Official Razorpay Checkout Options
+      const options = {
+        key: orderData.key || 'rzp_test_TmX1cUtE83dfqo',
+        amount: orderData.amount * 100, // paise
+        currency: orderData.currency || 'INR',
+        name: 'CineGo Entertainment',
+        description: `Movie Tickets: ${movie?.title || 'Cinema Booking'} (${booking.seats?.join(', ')})`,
+        image: 'https://cdn-icons-png.flaticon.com/512/3171/3171927.png',
+        order_id: orderData.orderId,
+        handler: async function (response) {
+          try {
+            setLoading(true);
+            setPaymentStep('processing');
+            setProcessingStage(2);
+
+            // 3. Verify Razorpay Payment Signature on Server
+            const verifyRes = await verifyPaymentSignature({
+              bookingId: booking._id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            if (verifyRes.success) {
+              setPaymentTxnId(response.razorpay_payment_id);
+              setPaymentStep('success');
+              setTimeout(() => {
+                navigate(`/confirmation/${booking._id}`);
+              }, 2200);
+            } else {
+              setError(verifyRes.message || 'Payment verification failed.');
+              setPaymentStep('select');
+            }
+          } catch (verifyErr) {
+            console.error('Verification Error:', verifyErr);
+            setError(verifyErr.response?.data?.error || verifyErr.message || 'Signature verification failed.');
+            setPaymentStep('select');
+          } finally {
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: booking.userId?.name || 'CineGo Customer',
+          email: booking.userId?.email || 'customer@cinego.com',
+          contact: '9999999999',
+        },
+        notes: {
+          bookingCode: booking.bookingCode,
+          seats: booking.seats?.join(','),
+        },
+        theme: {
+          color: '#6366f1',
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+            setError('Payment cancelled by user.');
+          },
+        },
+      };
+
+      // 3. Open Official Razorpay Checkout Popup
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (failRes) {
+        setLoading(false);
+        setError(`Payment Failed: ${failRes.error?.description || 'Transaction declined'}`);
+      });
+      rzp.open();
     } catch (err) {
       console.error('Payment Error:', err);
-      setError(err.response?.data?.error || err.message || 'Payment failed');
-      setPaymentStep('select');
-    } finally {
+      setError(err.response?.data?.error || err.message || 'Failed to initiate payment.');
       setLoading(false);
     }
-  };
-
-  const executeInstantPayment = async () => {
-    await handlePayment();
   };
 
   const handleCancelBooking = async () => {
@@ -119,79 +157,116 @@ const CheckoutPage = () => {
   };
 
   const renderMethodSelection = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-        Choose Payment Method
-      </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+      {/* Razorpay Gateway Header */}
+      <div style={{
+        background: 'linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.2))',
+        border: '1px solid rgba(59, 130, 246, 0.4)',
+        borderRadius: '12px',
+        padding: '1.2rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.8rem',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+          <div style={{
+            background: '#0284c7',
+            color: '#fff',
+            fontWeight: '900',
+            fontSize: '1rem',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '6px',
+            letterSpacing: '1px',
+          }}>
+            Razorpay
+          </div>
+          <div>
+            <div style={{ fontWeight: '800', color: '#fff', fontSize: '0.95rem' }}>
+              Official Payment Gateway
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#93c5fd' }}>
+              UPI • Netbanking • Cards • Wallets
+            </div>
+          </div>
+        </div>
+        <div style={{
+          background: 'rgba(16, 185, 129, 0.2)',
+          border: '1px solid #10b981',
+          color: '#34d399',
+          padding: '0.25rem 0.7rem',
+          borderRadius: '20px',
+          fontSize: '0.75rem',
+          fontWeight: '700',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.3rem',
+        }}>
+          <ShieldCheck size={14} /> 256-Bit SSL Secure
+        </div>
+      </div>
 
-      <button
-        onClick={() => { setSelectedMethod('card'); setPaymentStep('card'); }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem',
-          background: selectedMethod === 'card' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-          border: selectedMethod === 'card' ? '1px solid rgba(99, 102, 241, 0.5)' : '1px solid var(--border-glass)',
-          borderRadius: '12px', textAlign: 'left', width: '100%', color: '#fff',
-        }}
-      >
-        <div style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', padding: '0.6rem', borderRadius: '10px' }}>
-          <CreditCard size={22} color="#fff" />
+      {/* Select Preferred Bank */}
+      <div>
+        <h4 style={{ fontSize: '0.9rem', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
+          Popular Banks (NetBanking / UPI)
+        </h4>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '0.6rem' }}>
+          {['SBI', 'HDFC', 'ICICI', 'Axis', 'Kotak', 'Federal'].map((bank) => (
+            <button
+              key={bank}
+              type="button"
+              onClick={() => setSelectedBank(bank)}
+              style={{
+                padding: '0.6rem 0.4rem',
+                borderRadius: '8px',
+                border: selectedBank === bank ? '2px solid var(--accent-primary)' : '1px solid var(--border-glass)',
+                background: selectedBank === bank ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.02)',
+                color: selectedBank === bank ? '#fff' : 'var(--text-muted)',
+                fontWeight: '700',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {bank}
+            </button>
+          ))}
         </div>
-        <div>
-          <div style={{ fontWeight: '700', fontSize: '1rem' }}>Credit / Debit Card</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Visa, Mastercard, Rupay</div>
-        </div>
-      </button>
+      </div>
 
-      <button
-        onClick={() => { setSelectedMethod('upi'); setPaymentStep('upi'); }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem',
-          background: selectedMethod === 'upi' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-          border: selectedMethod === 'upi' ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid var(--border-glass)',
-          borderRadius: '12px', textAlign: 'left', width: '100%', color: '#fff',
-        }}
-      >
-        <div style={{ background: 'linear-gradient(135deg, #10b981, #059669)', padding: '0.6rem', borderRadius: '10px' }}>
-          <Smartphone size={22} color="#fff" />
-        </div>
-        <div>
-          <div style={{ fontWeight: '700', fontSize: '1rem' }}>UPI Payment</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Google Pay, PhonePe, Paytm</div>
-        </div>
-      </button>
-
-      <button
-        onClick={() => { setSelectedMethod('netbanking'); setPaymentStep('netbanking'); }}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.2rem',
-          background: selectedMethod === 'netbanking' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-          border: selectedMethod === 'netbanking' ? '1px solid rgba(245, 158, 11, 0.5)' : '1px solid var(--border-glass)',
-          borderRadius: '12px', textAlign: 'left', width: '100%', color: '#fff',
-        }}
-      >
-        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #d97706)', padding: '0.6rem', borderRadius: '10px' }}>
-          <Building2 size={22} color="#fff" />
-        </div>
-        <div>
-          <div style={{ fontWeight: '700', fontSize: '1rem' }}>Net Banking</div>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>SBI, HDFC, ICICI, Axis & more</div>
-        </div>
-      </button>
-
-      <div style={{ borderTop: '1px solid var(--border-glass)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+      {/* Primary Pay Button */}
+      <div style={{ marginTop: '0.5rem' }}>
         <button
           type="button"
           disabled={loading || timeLeft === 0}
-          onClick={executeInstantPayment}
-          className="btn-secondary"
+          onClick={handlePayment}
+          className="btn-primary"
           style={{
-            width: '100%', justifyContent: 'center', padding: '0.8rem', fontSize: '0.85rem',
-            borderColor: 'rgba(99,102,241,0.4)', color: '#818cf8',
-            display: 'flex', gap: '0.4rem', alignItems: 'center',
+            width: '100%',
+            justifyContent: 'center',
+            padding: '1rem',
+            fontSize: '1.05rem',
+            fontWeight: '800',
+            background: 'linear-gradient(135deg, #2563eb, #4f46e5)',
+            boxShadow: '0 8px 24px rgba(37, 99, 235, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
           }}
         >
-          <Zap size={16} color="#fbbf24" /> Instant Demo Payment (Skip Details)
+          {loading ? (
+            'Opening Razorpay Checkout...'
+          ) : (
+            <>
+              <Lock size={18} /> Pay ₹{booking.totalAmount} using Razorpay
+            </>
+          )}
         </button>
+        <p style={{ textAlign: 'center', fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.6rem' }}>
+          Clicking opens official Razorpay popup to pay via UPI (GPay, PhonePe), Cards or NetBanking.
+        </p>
       </div>
     </div>
   );
