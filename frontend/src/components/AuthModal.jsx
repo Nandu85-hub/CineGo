@@ -130,17 +130,27 @@ const AuthModal = ({ isOpen, onClose, initialView = 'login' }) => {
         }, 1400);
       } else if (modalMode === 'forgot') {
         await directResetPassword({ email: normalizedEmail, newPassword });
-        setToast({
-          type: 'success',
-          message: 'Password reset successful! You can now sign in with your new password.',
-          duration: 4000,
-        });
-        setPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        setTimeout(() => {
+        try {
+          await login({ email: normalizedEmail, password: newPassword });
+          setIsCompleting(true);
+          setToast({
+            type: 'success',
+            message: 'Password updated successfully! Welcome back to CineGo.',
+            duration: 3000,
+            simple: true,
+          });
+          redirectTimeoutRef.current = setTimeout(onClose, 2000);
+        } catch {
+          setToast({
+            type: 'success',
+            message: 'Password reset successful! You can now sign in with your new password.',
+            duration: 4000,
+          });
+          setPassword(newPassword);
+          setNewPassword('');
+          setConfirmPassword('');
           setModalMode('login');
-        }, 1500);
+        }
       }
     } catch (err) {
       const message = err?.message?.toLowerCase() || '';

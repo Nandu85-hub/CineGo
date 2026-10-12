@@ -311,11 +311,29 @@ const resetPassword = asyncWrapper(async (req, res) => {
   user.passwordHash = await bcrypt.hash(password, salt);
   user.resetPasswordToken = null;
   user.resetPasswordExpiry = null;
+
+  // Ensure the user is marked as verified (in case they weren't before)
+  user.isVerified = true;
+  user.otp = null;
+  user.otpExpiry = null;
+  user.verificationToken = null;
+  user.verificationTokenExpiry = null;
+
   await user.save();
+
+  // Auto-login: generate JWT token so they can immediately be logged in
+  const jwtToken = generateToken(user._id, user.role);
 
   res.json({
     success: true,
     message: 'Password reset successful! You can now log in with your new password.',
+    token: jwtToken,
+    data: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    },
   });
 });
 
@@ -344,11 +362,26 @@ const directResetPassword = asyncWrapper(async (req, res) => {
   user.passwordHash = await bcrypt.hash(newPassword, salt);
   user.resetPasswordToken = null;
   user.resetPasswordExpiry = null;
+  user.isVerified = true;
+  user.otp = null;
+  user.otpExpiry = null;
+  user.verificationToken = null;
+  user.verificationTokenExpiry = null;
   await user.save();
+
+  const token = generateToken(user._id, user.role);
 
   res.json({
     success: true,
     message: 'Password updated successfully! You can now sign in with your new password.',
+    token,
+    data: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token,
+    },
   });
 });
 
