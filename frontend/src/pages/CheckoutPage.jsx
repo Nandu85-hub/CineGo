@@ -77,7 +77,7 @@ const CheckoutPage = () => {
       await new Promise((resolve) => setTimeout(resolve, 900));
 
       const mockPaymentId = `pay_${Math.random().toString(36).substring(2, 9).toUpperCase()}${Date.now().toString().slice(-4)}`;
-      const mockSignature = `sig_rzp_${Date.now()}`;
+      const mockSignature = `sig_test_${Date.now()}`;
       setPaymentTxnId(mockPaymentId);
 
       const verifyRes = await verifyPaymentSignature({
