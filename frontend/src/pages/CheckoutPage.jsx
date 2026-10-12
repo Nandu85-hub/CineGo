@@ -421,15 +421,181 @@ const CheckoutPage = () => {
         </span>
       </div>
 
-      {/* Razorpay Dual-Orbit Processing Spinner */}
-      <div style={{ position: 'relative', width: '90px', height: '90px', margin: '0.5rem 0' }}>
+      {/* 🪙 Speedy Golden Coins Express Transfer Runway */}
+      <div style={{
+        width: '100%',
+        maxWidth: '380px',
+        background: 'rgba(5, 15, 35, 0.75)',
+        border: '1px solid rgba(51, 149, 255, 0.35)',
+        borderRadius: '14px',
+        padding: '0.85rem 1rem',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: 'inset 0 0 20px rgba(14, 165, 233, 0.15)',
+      }}>
+        {/* Header label for express money stream */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.6rem',
+          fontSize: '0.75rem',
+          fontWeight: '700',
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+          color: '#93c5fd',
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+            Instant Payment Stream
+          </span>
+          <span style={{ color: '#fbbf24', fontWeight: '800', fontSize: '0.85rem' }}>
+            ₹{booking.totalAmount}
+          </span>
+        </div>
+
+        {/* Speedy Runway Container */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'relative',
+          height: '54px',
+        }}>
+          {/* Sender Source Node (Account / Wallet) */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.2rem',
+            zIndex: 4,
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '11px',
+              background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+              border: '1.5px solid rgba(148, 163, 184, 0.45)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 3px 10px rgba(0,0,0,0.5)',
+            }}>
+              {selectedMethod === 'card' ? (
+                <CreditCard size={19} color="#38bdf8" />
+              ) : selectedMethod === 'upi' ? (
+                <Smartphone size={19} color="#38bdf8" />
+              ) : (
+                <Building2 size={19} color="#38bdf8" />
+              )}
+            </div>
+            <span style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: '600' }}>You</span>
+          </div>
+
+          {/* Runway Laser Track with Speed Arrow Lines */}
+          <div style={{
+            position: 'absolute',
+            left: '42px',
+            right: '42px',
+            top: '20px',
+            height: '4px',
+            background: 'linear-gradient(90deg, rgba(56, 189, 248, 0.3) 0%, rgba(251, 191, 36, 0.7) 50%, rgba(51, 149, 255, 0.4) 100%)',
+            borderRadius: '2px',
+            boxShadow: '0 0 10px rgba(56, 189, 248, 0.5)',
+          }}>
+            {/* Speed Motion Energy Pulse */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'repeating-linear-gradient(90deg, transparent, transparent 12px, rgba(255,255,255,0.45) 12px, rgba(255,255,255,0.45) 20px)',
+              animation: 'rzpSpeedFlow 0.5s linear infinite',
+            }} />
+          </div>
+
+          {/* Rapid Flying Golden Coins with Speed Trails */}
+          <div style={{
+            position: 'absolute',
+            left: '36px',
+            right: '42px',
+            top: '8px',
+            height: '28px',
+            overflow: 'hidden',
+            pointerEvents: 'none',
+          }}>
+            {/* Coin 1 */}
+            <div className="rzp-speedy-coin" style={{ animationDelay: '0s' }}>
+              <div className="rzp-coin-trail" />
+              <div className="rzp-coin-disc">
+                <span className="rzp-coin-symbol">₹</span>
+              </div>
+            </div>
+
+            {/* Coin 2 */}
+            <div className="rzp-speedy-coin" style={{ animationDelay: '0.26s' }}>
+              <div className="rzp-coin-trail" />
+              <div className="rzp-coin-disc">
+                <span className="rzp-coin-symbol">₹</span>
+              </div>
+            </div>
+
+            {/* Coin 3 */}
+            <div className="rzp-speedy-coin" style={{ animationDelay: '0.52s' }}>
+              <div className="rzp-coin-trail" />
+              <div className="rzp-coin-disc">
+                <span className="rzp-coin-symbol">₹</span>
+              </div>
+            </div>
+
+            {/* Coin 4 */}
+            <div className="rzp-speedy-coin" style={{ animationDelay: '0.78s' }}>
+              <div className="rzp-coin-trail" />
+              <div className="rzp-coin-disc">
+                <span className="rzp-coin-symbol">₹</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Receiver Target Node (Razorpay Vault) */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.2rem',
+            zIndex: 4,
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '11px',
+              background: 'linear-gradient(135deg, #0c2340, #1e3a8a)',
+              border: '1.5px solid rgba(51, 149, 255, 0.75)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 16px rgba(51, 149, 255, 0.65)',
+              animation: 'rzpVaultGlow 0.8s ease-in-out infinite alternate',
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M22.3 8.35L14.7 0.75C14.22 0.27 13.57 0 12.89 0H3.34C2.12 0 1.25 1.18 1.63 2.34L6.15 16.03C6.39 16.76 6.96 17.33 7.69 17.57L9.93 18.31L7.54 22.38C7.14 23.06 7.63 23.91 8.42 23.91H11.59C12.18 23.91 12.72 23.57 12.98 23.05L16.2 16.63H20.66C21.88 16.63 22.75 15.45 22.37 14.29L22.3 8.35Z" fill="#3395FF"/>
+              </svg>
+            </div>
+            <span style={{ fontSize: '0.68rem', color: '#38bdf8', fontWeight: '700' }}>Razorpay</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Razorpay Dual-Orbit Processing Spinner with Fast 3D Gold Rupee Coin */}
+      <div style={{ position: 'relative', width: '92px', height: '92px', margin: '0.3rem 0' }}>
         {/* Outer Glowing Fast Orbit */}
         <div style={{
           position: 'absolute',
           top: 0,
           left: 0,
-          width: '90px',
-          height: '90px',
+          width: '92px',
+          height: '92px',
           borderRadius: '50%',
           border: '3.5px solid rgba(51, 149, 255, 0.15)',
           borderTopColor: '#3395ff',
@@ -443,30 +609,45 @@ const CheckoutPage = () => {
           position: 'absolute',
           top: '12px',
           left: '12px',
-          width: '66px',
-          height: '66px',
+          width: '68px',
+          height: '68px',
           borderRadius: '50%',
           border: '2.5px dashed rgba(51, 149, 255, 0.35)',
           borderBottomColor: '#60a5fa',
           animation: 'rzpSpinCounter 1.3s linear infinite',
         }} />
 
-        {/* Center Pulsing Razorpay Emblem */}
+        {/* Center Fast Spinning 3D Gold Rupee Coin */}
         <div style={{
           position: 'absolute',
           top: '25px',
           left: '25px',
-          width: '40px',
-          height: '40px',
+          width: '42px',
+          height: '42px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, #0c2340, #1e3a8a)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          animation: 'rzpPulse 1.2s ease-in-out infinite',
-          boxShadow: '0 0 12px rgba(51, 149, 255, 0.5)',
+          perspective: '500px',
         }}>
-          <Lock size={18} color="#3395ff" />
+          <div style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle at 30% 30%, #fef08a, #f59e0b 55%, #b45309 100%)',
+            border: '2px solid #fde047',
+            boxShadow: '0 0 18px rgba(245, 158, 11, 0.85), inset 0 2px 3px rgba(255, 255, 255, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: '900',
+            fontSize: '1.25rem',
+            color: '#78350f',
+            textShadow: '0 1px 0 rgba(255,255,255,0.7)',
+            animation: 'rzpFastCoin3DSpin 0.75s linear infinite',
+          }}>
+            ₹
+          </div>
         </div>
       </div>
 
@@ -554,6 +735,84 @@ const CheckoutPage = () => {
         @keyframes rzpPulse {
           0%, 100% { transform: scale(1); opacity: 1; }
           50% { transform: scale(1.12); opacity: 0.85; }
+        }
+        @keyframes rzpFastCoin3DSpin {
+          0% { transform: rotateY(0deg); }
+          100% { transform: rotateY(360deg); }
+        }
+        @keyframes rzpFastCoinShoot {
+          0% {
+            left: 0%;
+            opacity: 0;
+            transform: scale(0.65);
+          }
+          15% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          85% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          100% {
+            left: 100%;
+            opacity: 0;
+            transform: scale(0.6);
+          }
+        }
+        @keyframes rzpCoinSpinCycle {
+          0% { transform: rotateY(0deg) rotateZ(0deg); }
+          50% { transform: rotateY(180deg) rotateZ(12deg); }
+          100% { transform: rotateY(360deg) rotateZ(0deg); }
+        }
+        @keyframes rzpVaultGlow {
+          0% { box-shadow: 0 0 8px rgba(51, 149, 255, 0.4); transform: scale(1); }
+          100% { box-shadow: 0 0 20px rgba(51, 149, 255, 0.9); transform: scale(1.05); }
+        }
+        @keyframes rzpSpeedFlow {
+          0% { background-position: 0 0; }
+          100% { background-position: 24px 0; }
+        }
+        .rzp-speedy-coin {
+          position: absolute;
+          top: 2px;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          animation: rzpFastCoinShoot 1.05s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+          pointer-events: none;
+        }
+        .rzp-coin-disc {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: radial-gradient(circle at 35% 30%, #fef08a, #f59e0b 60%, #b45309 100%);
+          border: 1.5px solid #fde047;
+          box-shadow: 0 0 12px rgba(251, 191, 36, 0.9), inset 0 1px 2px #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          animation: rzpCoinSpinCycle 0.45s linear infinite;
+          position: relative;
+          z-index: 2;
+        }
+        .rzp-coin-symbol {
+          font-size: 0.75rem;
+          font-weight: 900;
+          color: #78350f;
+          line-height: 1;
+          text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        .rzp-coin-trail {
+          position: absolute;
+          right: calc(100% - 8px);
+          width: 28px;
+          height: 3px;
+          background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.9));
+          border-radius: 2px;
+          filter: blur(0.5px);
+          box-shadow: 0 0 6px rgba(251, 191, 36, 0.8);
         }
       `}</style>
     </div>
