@@ -3,6 +3,7 @@ const Seat = require('../models/Seat');
 const Booking = require('../models/Booking');
 const Showtime = require('../models/Showtime');
 const generateBookingCode = require('../utils/generateBookingCode');
+const { emitSeatsStatusChanged } = require('../socket');
 
 /**
  * Reserve seats temporarily for a specific user and showtime
@@ -77,6 +78,9 @@ const reserveSeats = async ({ showtimeId, seatNumbers, userId }) => {
     { $set: { bookingId: booking._id } }
   );
 
+  // Broadcast reserved status to all users viewing this showtime in real-time
+  emitSeatsStatusChanged(showtimeId, seatNumbers, 'reserved');
+
   return booking;
 };
 
@@ -107,6 +111,9 @@ const releaseSeats = async ({ bookingId, userId }) => {
 
   booking.status = 'cancelled';
   await booking.save();
+
+  // Broadcast available status to all users viewing this showtime in real-time
+  emitSeatsStatusChanged(booking.showtimeId, booking.seats, 'available');
 
   return booking;
 };
@@ -141,6 +148,11 @@ const cleanupExpiredReservations = async () => {
     { _id: { $in: expiredBookingIds } },
     { $set: { status: 'expired' } }
   );
+
+  // Broadcast availability for all released seats
+  expiredBookings.forEach((b) => {
+    emitSeatsStatusChanged(b.showtimeId, b.seats, 'available');
+  });
 
   console.log(`[Seat Cleanup] Released ${expiredBookings.length} expired booking(s).`);
   return expiredBookings.length;

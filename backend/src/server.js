@@ -1,7 +1,9 @@
 require('dotenv').config();
+const http = require('http');
 const app = require('./app');
 const connectDB = require('./config/db');
 const startReservationCleanupJob = require('./jobs/reservationCleanup');
+const { initSocket } = require('./socket');
 
 const getAvailablePort = (preferredPort) => {
   const net = require('net');
@@ -32,11 +34,15 @@ connectDB().then(async () => {
     process.exit(1);
   });
 
-  const server = app.listen(PORT, () => {
+  const server = http.createServer(app);
+  initSocket(server);
+
+  server.listen(PORT, () => {
     console.log(`==================================================`);
     console.log(` Movie Booking Server is running on port: ${PORT}`);
     console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(` API Base URL: http://localhost:${PORT}/api`);
+    console.log(` WebSockets: Socket.io active on port: ${PORT}`);
     console.log(`==================================================`);
 
     startReservationCleanupJob();

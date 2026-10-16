@@ -3,6 +3,7 @@ const { getRazorpayInstance } = require('../config/razorpay');
 const Booking = require('../models/Booking');
 const Payment = require('../models/Payment');
 const Seat = require('../models/Seat');
+const { emitSeatsStatusChanged } = require('../socket');
 
 
 const createRazorpayOrder = async (bookingId, userId) => {
@@ -139,6 +140,9 @@ const verifyPaymentSignature = async ({
         },
       }
     );
+
+    // Broadcast booked status to all viewers in real-time
+    emitSeatsStatusChanged(booking.showtimeId, booking.seats, 'booked');
   }
 
   return {
@@ -182,6 +186,8 @@ const handleWebhookEvent = async (body, signature) => {
           { _id: { $in: booking.seatIds } },
           { $set: { status: 'booked', reservedUntil: null } }
         );
+
+        emitSeatsStatusChanged(booking.showtimeId, booking.seats, 'booked');
       }
     }
   }

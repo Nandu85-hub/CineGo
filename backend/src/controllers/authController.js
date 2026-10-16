@@ -55,7 +55,7 @@ const register = asyncWrapper(async (req, res) => {
     email: email.toLowerCase(),
     passwordHash,
     role: role || 'user',
-    isVerified: false,
+    isVerified: true,
     verificationToken: hashedToken,
     verificationTokenExpiry: tokenExpiry,
     otp: hashedOTP,
@@ -88,13 +88,14 @@ const login = asyncWrapper(async (req, res) => {
     return res.status(401).json({ success: false, error: 'Invalid email or password' });
   }
 
-  // Block unverified regular users (admins bypass this check)
-  if (user.role === 'user' && !user.isVerified) {
-    return res.status(403).json({
-      success: false,
-      error: 'Please verify your email address before logging in. Check your inbox for the verification link.',
-      email: user.email,
-    });
+  // If user was previously unverified, automatically mark them verified upon successful credential match
+  if (!user.isVerified) {
+    user.isVerified = true;
+    user.otp = null;
+    user.otpExpiry = null;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
+    await user.save();
   }
 
   const token = generateToken(user._id, user.role);
