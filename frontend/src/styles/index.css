@@ -369,6 +369,21 @@ button {
   border: 1px dashed #334155;
 }
 
+/* Orange pulsing seat — another user is currently selecting it */
+.seat-selecting {
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #fff;
+  cursor: not-allowed;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.6);
+  animation: seat-pulse 1.2s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+@keyframes seat-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(249, 115, 22, 0.5); transform: scale(1); }
+  50%       { box-shadow: 0 0 18px rgba(249, 115, 22, 0.9); transform: scale(1.08); }
+}
+
 .seat-vip-border {
   border: 1px solid var(--accent-secondary);
 }

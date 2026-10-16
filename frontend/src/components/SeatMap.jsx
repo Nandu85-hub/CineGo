@@ -34,20 +34,28 @@ const SeatMap = ({ seats, selectedSeats, onSeatClick, maxSeats = 8 }) => {
                 const isSelected = selectedSeats.includes(seat.seatNumber);
                 const isBooked = seat.status === 'booked';
                 const isReserved = seat.status === 'reserved';
+                const isSelecting = seat.status === 'selecting';
                 const isVip = seat.seatType === 'vip';
 
                 let statusClass = 'seat-available';
                 if (isBooked) statusClass = 'seat-booked';
                 else if (isReserved) statusClass = 'seat-reserved';
+                else if (isSelecting) statusClass = 'seat-selecting';
                 else if (isSelected) statusClass = 'seat-selected';
+
+                const isDisabled = isBooked || isReserved || isSelecting;
 
                 return (
                   <button
                     key={seat._id}
-                    disabled={isBooked || isReserved}
+                    disabled={isDisabled}
                     onClick={() => onSeatClick(seat.seatNumber, seat.price)}
                     className={`seat-btn ${statusClass} ${isVip ? 'seat-vip-border' : ''}`}
-                    title={`${seat.seatNumber} (${seat.seatType.toUpperCase()}) - ₹${seat.price}`}
+                    title={
+                      isSelecting
+                        ? `${seat.seatNumber} — Being selected by another user`
+                        : `${seat.seatNumber} (${seat.seatType.toUpperCase()}) - ₹${seat.price}`
+                    }
                   >
                     {seat.col}
                   </button>
@@ -82,6 +90,10 @@ const SeatMap = ({ seats, selectedSeats, onSeatClick, maxSeats = 8 }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
           <div className="seat-btn seat-selected" style={{ width: '22px', height: '22px' }} />
           <span>Selected</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+          <div className="seat-btn seat-selecting" style={{ width: '22px', height: '22px' }} />
+          <span>Being Selected</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
           <div className="seat-btn seat-reserved" style={{ width: '22px', height: '22px' }} />

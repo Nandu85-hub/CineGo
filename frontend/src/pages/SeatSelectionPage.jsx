@@ -48,21 +48,20 @@ const SeatSelectionPage = () => {
       setSeats((prevSeats) =>
         prevSeats.map((seat) => {
           if (seatNumbers.includes(seat.seatNumber)) {
-            return {
-              ...seat,
-              status,
-            };
+            return { ...seat, status };
           }
           return seat;
         })
       );
 
-      // Deselect seats if reserved or booked by someone else
-      if (status === 'reserved' || status === 'booked') {
+      // If another user just started selecting or fully reserved/booked a seat,
+      // auto-deselect it from OUR cart if we had it selected
+      if (status === 'selecting' || status === 'reserved' || status === 'booked') {
         setSelectedSeats((prevSelected) => {
           const conflicting = prevSelected.filter((sNum) => seatNumbers.includes(sNum));
           if (conflicting.length > 0) {
-            setError(`Notice: Seat(s) ${conflicting.join(', ')} were just taken by another user.`);
+            const action = status === 'selecting' ? 'is being selected' : 'was taken';
+            setError(`⚠️ Seat(s) ${conflicting.join(', ')} ${action} by another user and was removed from your selection.`);
             return prevSelected.filter((sNum) => !seatNumbers.includes(sNum));
           }
           return prevSelected;
@@ -74,7 +73,9 @@ const SeatSelectionPage = () => {
 
     return () => {
       if (showtimeId) {
-        socket.emit('leave_showtime', showtimeId);
+        // Release any seats WE are currently selecting before leaving
+        const socket2 = getSocket();
+        socket2.emit('leave_showtime', showtimeId);
       }
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
@@ -116,15 +117,21 @@ const SeatSelectionPage = () => {
   }, [loading]);
 
   const handleSeatClick = (seatNumber, price) => {
+    const socket = getSocket();
     let updated;
     if (selectedSeats.includes(seatNumber)) {
+      // User is DESELECTING their own seat
       updated = selectedSeats.filter((s) => s !== seatNumber);
+      // Tell others this seat is no longer being selected by us
+      socket.emit('seat_deselecting', { showtimeId, seatNumber });
     } else {
       if (selectedSeats.length >= 8) {
         alert('You can select a maximum of 8 seats per booking');
         return;
       }
       updated = [...selectedSeats, seatNumber];
+      // Tell others this seat is now being selected by us
+      socket.emit('seat_selecting', { showtimeId, seatNumber });
     }
     setSelectedSeats(updated);
 
