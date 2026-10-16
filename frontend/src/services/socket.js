@@ -1,17 +1,32 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ||
-  (window.location.port === '5173' ? 'http://localhost:5001' : window.location.origin);
+const getSocketUrl = () => {
+  if (import.meta.env.VITE_SOCKET_URL) {
+    return import.meta.env.VITE_SOCKET_URL;
+  }
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return 'http://localhost:5001';
+    }
+  }
+  // Production Render backend host
+  return 'https://cinego-backend-ip7m.onrender.com';
+};
+
+const SOCKET_URL = getSocketUrl();
 
 let socketInstance = null;
 
 export const getSocket = () => {
   if (!socketInstance) {
+    console.log('[Socket] Initializing connection to:', SOCKET_URL);
     socketInstance = io(SOCKET_URL, {
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 10,
+      reconnectionAttempts: 20,
       reconnectionDelay: 1000,
       transports: ['websocket', 'polling'],
     });
@@ -25,7 +40,7 @@ export const getSocket = () => {
     });
 
     socketInstance.on('connect_error', (err) => {
-      console.warn('[Socket] Connection warning:', err.message);
+      console.warn('[Socket] Connection warning to', SOCKET_URL, ':', err.message);
     });
   }
 
